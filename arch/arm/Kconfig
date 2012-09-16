@@ -11,6 +11,7 @@ config ARM
 	select HAVE_AOUT
 	select HAVE_IDE
 	select RTC_LIB
+        select HAVE_MEMBLOCK
 	select SYS_SUPPORTS_APM_EMULATION
 	select GENERIC_ATOMIC64 if (!CPU_32v6K)
 	select HAVE_OPROFILE if (HAVE_PERF_EVENTS)

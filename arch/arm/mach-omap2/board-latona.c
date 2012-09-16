@@ -61,6 +61,8 @@
 #include <mach/sec_common.h>
 #include <mach/sec_mux.h>
 
+#include "omap_ion.h"
+
 #ifdef CONFIG_OMAP_MUX
 extern struct omap_board_mux *sec_board_mux_ptr;
 extern struct omap_board_mux *sec_board_wk_mux_ptr;
@@ -480,6 +482,7 @@ static void __init omap_board_init(void)
 	printk("\n");
 
 	omap_board_peripherals_init();
+        omap_register_ion();
 	omap_board_display_init(OMAP_DSS_VENC_TYPE_COMPOSITE);
 	usb_uhhtll_init(&usbhs_pdata);
 	sr_class1p5_init();
