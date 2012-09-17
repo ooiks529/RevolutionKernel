@@ -34,12 +34,14 @@
 #include <linux/gpio.h>
 #include <linux/bootmem.h>
 #include <linux/reboot.h>
+#include <linux/memblock.h>
 
 #include <asm/setup.h>
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 
 #include <plat/common.h>
+#include <plat/control.h>
 #include <plat/board.h>
 #include <plat/usb.h>
 #include <plat/opp_twl_tps.h>
@@ -66,6 +68,7 @@
 #ifdef CONFIG_OMAP_MUX
 extern struct omap_board_mux *sec_board_mux_ptr;
 extern struct omap_board_mux *sec_board_wk_mux_ptr;
+static void __init latona_reserve(void);
 #else
 #define sec_board_mux_ptr		NULL
 #define sec_board_wk_mux_ptr		NULL
@@ -431,27 +434,41 @@ static struct notifier_block omap_board_reboot_notifier = {
 struct opp_frequencies {
 	unsigned long mpu;
 	unsigned long iva;
+        unsigned long ena;
 };
 
 static struct opp_frequencies opp_freq_add_table[] __initdata = {
   {
+        .mpu = 120000000,
+        .iva = 120000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP1_LOW,
+  },
+  {
 	.mpu = 800000000,
 	.iva = 660000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP120_VDD1,
   },
   {
 	.mpu = 1000000000,
 	.iva =  800000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP1G_VDD1,
   },
-#if 0
-  1.2GHz has been observed to cause issues on ES1.1 boards and requires
-  further investigation.
+  {
+        .mpu = 1000000000,
+        .iva =  860000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP1_2G_VDD1,
+  },
   {
 	.mpu = 1200000000,
-	.iva =   65000000,
+	.iva =  870000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP1_3G_VDD1,
   },
-#endif
-
-  { 0, 0 },
+  {
+        .mpu = 1300000000,
+        .iva =  880000000,
+        .ena = OMAP3630_CONTROL_FUSE_OPP1_4G_VDD1,
+  },
+  { 0, 0, 0, 0, 0, 0,}
 };
 
 static void __init omap_board_init(void)
@@ -498,6 +515,15 @@ static void __init omap_board_init(void)
 	sec_common_init_post();
 }
 
+static void __init latona_reserve(void)
+{
+
+        memblock_remove(OMAP3_PHYS_ADDR_SMC_MEM, PHYS_ADDR_SMC_SIZE);
+#ifdef CONFIG_ION_OMAP
+        omap_ion_init();
+#endif
+}
+
 static void __init omap_board_fixup(struct machine_desc *desc,
 				    struct tag *tags, char **cmdline,
 				    struct meminfo *mi)
@@ -520,6 +546,7 @@ static int __init latona_opp_init(void)
 	struct omap_opp *mopp, *dopp;
 	struct device *mdev, *ddev;
 	struct opp_frequencies *opp_freq;
+        unsigned long hw_support;
 
       printk(" ******** latona_opp_init********* \n");
 	if (!cpu_is_omap3630())
@@ -544,9 +571,10 @@ static int __init latona_opp_init(void)
 	for (opp_freq = opp_freq_add_table; opp_freq->mpu; opp_freq++) {
 		/* check enable/disable status of MPU frequecy setting */
 		mopp = opp_find_freq_exact(mdev, opp_freq->mpu, false);
+                hw_support = omap_ctrl_readl(opp_freq->ena);
 		if (IS_ERR(mopp))
 			mopp = opp_find_freq_exact(mdev, opp_freq->mpu, true);
-		if (IS_ERR(mopp)) {
+		if (IS_ERR(mopp) || !hw_support){
 			pr_err("%s: MPU does not support %lu MHz\n", __func__, opp_freq->mpu / 1000000);
 			continue;
 		}
@@ -595,6 +623,7 @@ MACHINE_START(LATONA, "LATONA")
     .io_pg_offst = ((0xfa000000) >> 18) & 0xfffc,
     .boot_params = 0x80000100,
     .fixup = omap_board_fixup,
+    .reserve = latona_reserve,
     .map_io = omap_board_map_io,
     .init_irq = omap_board_init_irq,
     .init_machine = omap_board_init,
