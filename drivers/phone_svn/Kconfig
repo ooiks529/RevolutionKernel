@@ -42,6 +42,11 @@ menuconfig PHONE_LOOPBACK_TEST
 	depends on SAMSUNG_PHONE_SVNET
 	default n
 
+menuconfig PHONE_STORAGE
+        tristate "DGS Storage"
+        depends on SAMSUNG_PHONE_SVNET
+        default n
+
 config SVNET_WHITELIST
 	bool "svnet uses whitelist via onedram"
 	default n
