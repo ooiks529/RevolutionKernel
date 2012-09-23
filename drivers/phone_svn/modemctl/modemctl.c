@@ -47,7 +47,7 @@
 #endif
 
 #ifdef CONFIG_SVNET_WHITELIST
-#include "portlist.h"
+#include <linux/phone_svn/portlist.h>
 #endif /* CONFIG_SVNET_WHITELIST */
 
 #define DRVNAME "modemctl"
