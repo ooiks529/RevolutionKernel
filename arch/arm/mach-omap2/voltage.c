@@ -368,6 +368,9 @@ static struct omap_volt_data omap36xx_vdd1_volt_data[] = {
 	{.volt_nominal = 1330000, .sr_oppmargin = 37500, .sr_errminlimit = 0xFA, .vp_errgain = 0x23, .abb_type = NOMINAL_OPP},/*stock 800*/
 	{.volt_nominal = 1387500, .sr_oppmargin = 62500,  .sr_errminlimit = 0xFA, .vp_errgain = 0x27, .abb_type = FAST_OPP},/*stock 1000*/
 	{.volt_nominal = 1430000, .sr_oppmargin = 62500, .sr_errminlimit = 0xFA, .vp_errgain = 0x27, .abb_type = FAST_OPP},/*opp5*/
+        {.volt_nominal = 1487500, .sr_oppmargin = 
+62500, .sr_errminlimit = 0xFA, .vp_errgain = 0x27, .abb_type = 
+FAST_OPP},/*opp6*/
 };
 
 /* VDD2 */
